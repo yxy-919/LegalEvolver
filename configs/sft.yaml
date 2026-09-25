@@ -1,0 +1,12 @@
+model_name_or_path: ${BASE_MODEL_PATH}
+dataset: ${SFT_DATA_PATH}
+output_dir: ${SFT_OUTPUT_DIR}
+stage: sft
+do_train: true
+finetuning_type: lora
+cutoff_len: 12288
+learning_rate: 8.0e-5
+num_train_epochs: 2
+bf16: true
+flash_attn: sdpa
+

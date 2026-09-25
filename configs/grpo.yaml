@@ -1,0 +1,18 @@
+algorithm: grpo
+model_path: ${MERGED_SFT_MODEL_PATH}
+train_data: ${GRPO_DATA_PATH}
+output_dir: ${GRPO_OUTPUT_DIR}
+rollouts_per_prompt: 8
+max_prompt_length: 12288
+max_response_length: 8192
+max_tool_calls: 10
+learning_rate: 1.0e-7
+kl_coefficient: 0.02
+attention_backend: sdpa
+
+reward:
+  outcome_weight: 0.891
+  format_weight: 0.099
+  rubric_weight: 0.01
+  rubric_bank_path: ${RUBRIC_BANK_PATH}
+

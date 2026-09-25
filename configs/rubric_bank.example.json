@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "statute_search": {
+      "legal_qualification": ["<criterion>"],
+      "sentencing": ["<criterion>"]
+    },
+    "precedent_search": {
+      "legal_qualification": ["<criterion>"],
+      "sentencing": ["<criterion>"]
+    },
+    "sentencing_guideline_search": {
+      "legal_qualification": ["<criterion>"],
+      "sentencing": ["<criterion>"]
+    },
+    "judicial_interpretation_search": {
+      "legal_qualification": ["<criterion>"],
+      "sentencing": ["<criterion>"]
+    }
+  }
+}

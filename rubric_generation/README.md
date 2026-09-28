@@ -7,8 +7,11 @@ This directory implements the paper's **Initial Rubric Construction** and
 2. `induce_rubrics.py` performs pairwise criterion discovery.
 3. `aggregate_rubrics.py` merges and abstracts overlapping criteria by retrieval
    tool and reasoning focus.
-4. `validate_rubrics.py` performs held-out revalidation and retains criteria that
-   continue to distinguish preferred queries.
+4. `validate_rubrics.py` performs held-out revalidation within each retrieval
+   tool and reasoning focus. Natural pairs compare same-tool query sets from the
+   two trajectories, while query-rewriting pairs directly compare the queries at
+   the rewritten intervention point. Criteria are retained only when they score
+   preferred queries higher across sufficient held-out examples.
 
 For initial construction, run the workflow on the seed trajectories used for
 policy initialization. For iterative refinement, rerun it on trajectories from

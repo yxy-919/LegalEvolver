@@ -15,6 +15,8 @@ dependencies = [
   "sentence-transformers>=3.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["Retrieval", "rubric_generation", "grpo", "evaluation", "utils"]
 
+[tool.setuptools.package-data]
+rubric_generation = ["*.jsonl", "README.md"]

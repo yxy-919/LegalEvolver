@@ -1,24 +1,23 @@
 encoder_path: ${SAILER_MODEL_PATH}
-index_root: ${LEGAL_INDEX_ROOT}
+index_root: ../indexes
 max_tool_calls: 10
-top_k: 4
-rerank_candidates: 24
+top_k: 5
+candidate_count: 24
 
 tools:
   statute_search:
-    source: statute
+    source_type: statute
     index: statutes.faiss
-    metadata: statutes.jsonl
-  precedent_search:
-    source: precedent
-    index: precedents.faiss
-    metadata: precedents.jsonl
-  sentencing_guideline_search:
-    source: sentencing_guideline
-    index: sentencing_guidelines.faiss
-    metadata: sentencing_guidelines.jsonl
+    metadata: statutes_metadata.jsonl
+  case_search:
+    source_type: precedent_case
+    index: cases.faiss
+    metadata: cases_metadata.jsonl
+  guideline_search:
+    source_type: sentencing_guideline
+    index: guidelines.faiss
+    metadata: guidelines_metadata.jsonl
   judicial_interpretation_search:
-    source: judicial_interpretation
+    source_type: judicial_interpretation
     index: judicial_interpretations.faiss
-    metadata: judicial_interpretations.jsonl
-
+    metadata: judicial_interpretations_metadata.jsonl

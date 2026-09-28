@@ -4,20 +4,20 @@ import json
 import os
 from typing import Any
 
-from openai import OpenAI
-
 
 class JudgeClient:
-    """Model-agnostic client for an OpenAI-compatible judge endpoint."""
+    """Model-agnostic client for any strong OpenAI-compatible judge."""
 
     def __init__(self) -> None:
+        from openai import OpenAI
+
         self.model = os.getenv("JUDGE_MODEL", "judge-model")
         self.client = OpenAI(
-            api_key=os.environ["JUDGE_API_KEY"],
+            api_key=os.getenv("JUDGE_API_KEY", "EMPTY"),
             base_url=os.environ["JUDGE_BASE_URL"],
         )
 
-    def score(self, prompt: str) -> dict[str, Any]:
+    def complete_json(self, prompt: str) -> dict[str, Any]:
         response = self.client.chat.completions.create(
             model=self.model,
             temperature=0,
@@ -25,4 +25,3 @@ class JudgeClient:
             messages=[{"role": "user", "content": prompt}],
         )
         return json.loads(response.choices[0].message.content or "{}")
-

@@ -46,7 +46,7 @@ class LegalRetrievalEnvironment:
             index_root = (config_file.parent / index_root).resolve()
         self.encoder = SailerEncoder(expand(config["encoder_path"]))
         self.max_tool_calls = int(config.get("max_tool_calls", 10))
-        self.top_k = int(config.get("top_k", 5))
+        self.top_k = int(config.get("top_k", 4))
         self.candidate_count = int(config.get("candidate_count", 24))
         self.reranker = reranker or self._dense_reranker
         self.call_count = 0

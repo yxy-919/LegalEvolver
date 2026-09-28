@@ -1,7 +1,7 @@
 encoder_path: ${SAILER_MODEL_PATH}
 index_root: ../indexes
 max_tool_calls: 10
-top_k: 5
+top_k: 4
 candidate_count: 24
 
 tools:

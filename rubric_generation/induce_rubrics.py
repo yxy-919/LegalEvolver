@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from utils.judge import JudgeClient
 
@@ -10,9 +11,11 @@ from utils.judge import JudgeClient
 PROMPT = """Compare the preferred and rejected trajectories for the same legal case.
 Identify how query formulation contributed to their different outcomes. Abstract the
 case-level difference into reusable query criteria. Organize each criterion by the
-retrieval tool and reasoning focus (legal_qualification or sentencing). Do not retain
-case identifiers or case-specific conclusions. Return JSON with a `rubrics` list;
-each item must contain target_tool, focus, criterion, and a 0--3 scoring_guide.
+retrieval tool and reasoning focus (legal_qualification, sentencing, or full_repair).
+Use full_repair when the comparison concerns overall repair across legal qualification
+and sentencing rather than either focus alone. Do not retain case identifiers or
+case-specific conclusions. Return JSON with a `rubrics` list; each item must contain
+target_tool, focus, criterion, and a 0--3 scoring_guide.
 
 CASE FACT:
 {case_fact}
@@ -23,6 +26,14 @@ PREFERRED TRAJECTORY:
 REJECTED TRAJECTORY:
 {rejected}
 """
+
+
+def normalize_focus_names(result: dict[str, Any]) -> dict[str, Any]:
+    """Use the paper's `full_repair` name while accepting legacy judge output."""
+    for rubric in result.get("rubrics", []):
+        if isinstance(rubric, dict) and rubric.get("focus") == "general_rubric":
+            rubric["focus"] = "full_repair"
+    return result
 
 
 def main() -> None:
@@ -44,6 +55,7 @@ def main() -> None:
                     rejected=json.dumps(pair["rejected"], ensure_ascii=False),
                 )
             )
+            result = normalize_focus_names(result)
             target.write(json.dumps({"case_id": pair["case_id"], **result}, ensure_ascii=False) + "\n")
 
 

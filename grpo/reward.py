@@ -93,7 +93,7 @@ def get_reward() -> LegalEvolverReward:
             format=float(os.getenv("FORMAT_REWARD_WEIGHT", "0.099")),
             rubric=float(os.getenv("RUBRIC_REWARD_WEIGHT", "0.01")),
         )
-        bank_path = Path(os.getenv("RUBRIC_BANK_PATH", "rubric_generation/rubric_bank.jsonl"))
+        bank_path = Path(os.getenv("RUBRIC_BANK_PATH", "rubric_generation/final_rubric_bank.jsonl"))
         _REWARD = LegalEvolverReward(RubricReward(RubricBank(bank_path)), weights)
     return _REWARD
 

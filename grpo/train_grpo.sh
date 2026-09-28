@@ -5,7 +5,7 @@ set -euo pipefail
 : "${GRPO_DATA:?set GRPO_DATA}"
 : "${OUTPUT_DIR:?set OUTPUT_DIR}"
 : "${JUDGE_BASE_URL:?set JUDGE_BASE_URL}"
-: "${RUBRIC_BANK_PATH:=rubric_generation/rubric_bank.jsonl}"
+: "${RUBRIC_BANK_PATH:=rubric_generation/final_rubric_bank.jsonl}"
 
 export JUDGE_MODEL="${JUDGE_MODEL:-judge-model}"
 export JUDGE_API_KEY="${JUDGE_API_KEY:-EMPTY}"

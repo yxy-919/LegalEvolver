@@ -1,0 +1,33 @@
+{
+  "article": {
+    "accuracy": 0.8572714126159489,
+    "precision": 0.881313093578108,
+    "recall": 0.8748006891422702,
+    "f1": 0.8757077965286789
+  },
+  "charge": {
+    "accuracy": 0.843717736705773,
+    "precision": 0.851298129935037,
+    "recall": 0.8525321353953166,
+    "f1": 0.8509078369905718
+  },
+  "penalty": {
+    "accuracy": 0.25556553623758016,
+    "precision": 0.23910216956719654,
+    "recall": 0.282786330444106,
+    "f1": 0.22830465230162308
+  },
+  "summary": {
+    "gold_path": "data/cmdl_test.jsonl",
+    "pred_path": "outputs/cmdl_predictions_final.jsonl",
+    "pred_rows": 2000,
+    "evaluated_cases": 2000,
+    "evaluated_defendants": 5902,
+    "missing_gold_rows": 0,
+    "parse_failed_rows": 0,
+    "missing_defendant_predictions": 58,
+    "extra_defendant_predictions": 21,
+    "bad_penalty_predictions": 95,
+    "alignment": "name"
+  }
+}

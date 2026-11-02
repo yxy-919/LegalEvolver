@@ -1,0 +1,13 @@
+paths:
+  sailer_model: ${SAILER_MODEL_PATH}
+  index_dir: ${LEGAL_INDEX_ROOT}
+  sentencing_general_context: ${SENTENCING_CONTEXT_PATH}
+retrieval:
+  batch_size: 64
+  max_length: 512
+  topk_default: 4
+  topk_max: 4
+  guideline_version_group: '2017'
+  context_version: '2017'
+runtime:
+  retrieval_device: cpu

@@ -1,5 +1,3 @@
-"""LegalEvolver's four retrieval tools."""
+from __future__ import annotations
 
-from .tools import LegalRetrievalEnvironment
-
-__all__ = ["LegalRetrievalEnvironment"]
+__all__ = []

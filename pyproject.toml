@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "legalevolver"
-version = "0.1.0"
-description = "Reference implementation of rubric-guided query optimization for legal judgment prediction"
+version = "0.2.0"
+description = "LegalEvolver legal retrieval, checkpoint inference and evaluation"
 requires-python = ">=3.10"
 dependencies = [
   "faiss-cpu>=1.8",
@@ -13,10 +13,17 @@ dependencies = [
   "openai>=1.40",
   "pyyaml>=6.0",
   "sentence-transformers>=3.0",
+  "torch",
+  "transformers",
+  "tqdm",
+  "scikit-learn",
 ]
 
-[tool.setuptools]
-packages = ["Retrieval", "rubric_generation", "grpo", "evaluation", "utils"]
+[project.optional-dependencies]
+serve = ["vllm"]
+
+[tool.setuptools.packages.find]
+include = ["Retrieval*", "Eval*"]
 
 [tool.setuptools.package-data]
-rubric_generation = ["*.jsonl", "README.md"]
+Retrieval = ["config.yaml"]

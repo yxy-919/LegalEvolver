@@ -1,0 +1,29 @@
+{
+  "article": {
+    "accuracy": 0.821,
+    "precision": 0.7577607822579328,
+    "recall": 0.7033744298349708,
+    "f1": 0.707307287766666
+  },
+  "charge": {
+    "accuracy": 0.794,
+    "precision": 0.7679914144497478,
+    "recall": 0.7233912538079205,
+    "f1": 0.7192030699680072
+  },
+  "penalty": {
+    "accuracy": 0.221,
+    "precision": 0.2505972497396299,
+    "recall": 0.24243395322034078,
+    "f1": 0.2104526668220084
+  },
+  "summary": {
+    "gold_path": "data/cail_test.jsonl",
+    "pred_path": "outputs/cail_predictions_final.jsonl",
+    "pred_rows": 1000,
+    "evaluated_rows": 1000,
+    "missing_gold_rows": 0,
+    "parse_failed_rows": 0,
+    "bad_penalty_rows": 7
+  }
+}

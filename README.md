@@ -1,137 +1,303 @@
-# LegalEvolver
+<div align="center">
 
-Legal retrieval tools, the released Qwen3-8B checkpoint, and matching inference and evaluation code for **LegalEvolver: Agentic Legal Judgment Prediction via Rubric-Guided Self-Evolution**.
+# ⚖️ LegalEvolver
 
-This release focuses on running the checkpoint. Training, preference-pair construction and rubric-generation code are outside the current release scope. Earlier repository versions remain in Git history.
+### Agentic Legal Judgment Prediction via Rubric-Guided Self-Evolution
 
-## Contents
+**Better legal searches. Evidence-grounded reasoning. Structured judgment prediction.**
 
-```text
-Retrieval/                 Four original retrieval implementations and SAILER/FAISS utilities
-  config.yaml              Portable paths to externally supplied retrieval resources
-Eval/
-  inference/
-    run_agentic.py         Multi-turn inference for single/multiple defendants
-    prompts.py            Original tool-use and judgment prompts
-    serve.sh              Serve the merged checkpoint with vLLM
-  new_eval_single_defendant.py
-  eval_multi_defendant.py
-  common.py               Shared parsing, label normalization and metrics
-  data/                   Charge vocabularies, alias mapping and charge embeddings
-checkpoints/
-  download.sh             Download, verify and restore the merged model
-  model.SHA256SUMS         Checksums of the original model files
-  cail_metrics.json        Recorded formal evaluation metrics
-  cmdl_metrics.json
-```
+Xinyu Yang · Jiejun Tan · Chenlong Deng · Chenghao Zhang · Tongyu Wen · Zhicheng Dou<br>
+Renmin University of China
 
-`Eval/inference/` contains inference and `Eval/` contains scoring. A single directory spelling avoids collisions between `eval/` and `Eval/` on case-insensitive filesystems.
+[![Model](https://img.shields.io/badge/🤗_Hugging_Face-LegalEvolver--Qwen3--8B-FFD21E?style=for-the-badge)](https://huggingface.co/yxy919/LegalEvolver-Qwen3-8B) [![Code](https://img.shields.io/badge/Code-GitHub-24292F?style=for-the-badge&logo=github)](https://github.com/yxy-919/LegalEvolver) [![Checkpoint](https://img.shields.io/badge/Checkpoint-Backup_Release-597CB3?style=for-the-badge)](https://github.com/yxy-919/LegalEvolver/releases/tag/checkpoint-best-v1)
 
-## Checkpoint
+[Overview](#overview) · [Results](#results) · [Quick Start](#quick-start) · [Prediction](#prediction) · [Evaluation](#evaluation) · [Retrieval Tools](#retrieval-tools) · [Citation](#citation)
 
-Download the merged, inference-ready weights from [the checkpoint Release](https://github.com/yxy-919/LegalEvolver/releases/tag/checkpoint-best-v1). The approximately 16 GB model is distributed as 1 GiB archive parts; do not load a part directly with Transformers.
+</div>
+
+<p align="center"><img src="assets/framework.png" alt="LegalEvolver: legal retrieval environment, trajectory generation, rubric construction, and rubric-policy co-evolution." width="100%"></p>
+<p align="center"><sub>The LegalEvolver framework. This release provides the checkpoint, legal retrieval tools, inference runner and evaluation scripts.</sub></p>
+
+## News
+
+- **2026-11-02** — Released the inference-ready **LegalEvolver-Qwen3-8B** checkpoint, four legal retrieval tools, and single-/multi-defendant inference and evaluation code.
+
+## Overview
+
+Legal judgment prediction requires more than recalling a charge name: the model must identify the legal issue, retrieve relevant evidence, and predict **law articles, charges and prison-term categories**. A vague or prematurely committed query can send the reasoning process in the wrong direction.
+
+**LegalEvolver** studies how to make intermediate legal searches more informative. The paper combines three components:
+
+1. **Diverse trajectory generation.** High-temperature exploration and conservative, fact-enriched and targeted-repair query rewriting supply candidate reasoning-and-search trajectories. Successful trajectories initialize the policy through supervised fine-tuning.
+2. **Legal query rubrics.** Within-case contrasts between successful and failed trajectories yield criteria organized by **four retrieval tools × three reasoning focuses**: legal qualification, sentencing and full repair.
+3. **Rubric-policy co-evolution.** Rubric feedback guides policy optimization, while new policy trajectories inform subsequent rubric refinement.
+
+At inference time, the agent alternates between reasoning, retrieval and observation before producing a structured judgment. Both **single-defendant** and **multiple-defendant** cases are supported.
+
+> **Release scope:** this repository contains retrieval, inference and evaluation code, plus links to the weights. Training and rubric-construction pipelines are outside this release. The verified step-149 checkpoint provenance and reproduction settings are documented in [Reproduction Notes](docs/reproduction.md).
+
+## Results
+
+### Main judgment prediction results
+
+Selected Qwen3-8B comparisons from manuscript **Table 1**. Each cell is **Accuracy / Macro-F1 (%)**; higher is better.
+
+| Dataset | Method | Law Article | Charge | Prison Term |
+|:---|:---|:---:|:---:|:---:|
+| CAIL2018 | Agentic RAG | 62.9 / 44.8 | 58.2 / 35.3 | 10.2 / 8.2 |
+| CAIL2018 | Vanilla SFT | 79.9 / 70.0 | 76.6 / 68.5 | 20.0 / 20.5 |
+| CAIL2018 | Standard GRPO | 80.7 / 68.9 | 78.2 / 69.4 | 21.2 / 20.8 |
+| CAIL2018 | SmartSearch | 81.1 / 67.3 | 78.3 / 69.5 | 20.7 / 20.7 |
+| CAIL2018 | **LegalEvolver** | **82.1 / 70.7** | **79.4 / 71.9** | **22.1 / 21.0** |
+| CMDL | Agentic RAG | 72.2 / 80.1 | 75.9 / 79.7 | 7.9 / 7.0 |
+| CMDL | Vanilla SFT | 80.6 / 82.7 | 79.6 / 80.2 | 23.6 / 19.7 |
+| CMDL | Standard GRPO | 84.2 / 85.2 | 82.1 / 83.8 | 24.0 / 20.7 |
+| CMDL | SmartSearch | 85.2 / 87.3 | 82.3 / 84.0 | 25.5 / 22.6 |
+| CMDL | **LegalEvolver** | **85.7 / 87.6** | **84.4 / 85.1** | **25.6 / 22.8** |
+
+**Overall: 61.5**, compared with 60.4 for SmartSearch and 59.9 for Standard GRPO. Overall is the unweighted mean of the 12 task/dataset metrics. The manuscript evaluates balanced test subsets of **1,000 CAIL2018 cases** and **2,000 CMDL cases**.
+
+Full precision checkpoint results: [`cail_metrics.json`](checkpoints/cail_metrics.json) and [`cmdl_metrics.json`](checkpoints/cmdl_metrics.json). These are historical records; release preparation did not rerun the full benchmark.
+
+<details>
+<summary><b>Query quality and rubric evolution in the paper</b></summary>
+
+The paper examines legal specificity, legal-issue completeness, retrieval actionability and alternative awareness. It reports an average query-quality score of **3.97** for LegalEvolver, compared with **3.22** for SmartSearch and **2.16** for Agentic RAG.
+
+<p align="center"><img src="assets/readme/query-quality.png" alt="Paper analysis of query failures and four query-quality dimensions." width="100%"></p>
+
+The statute-search example below shows criteria becoming more explicit about decisive facts, offense boundaries and statutory sentencing tiers. These figures describe the paper's analysis, rather than additional training stages claimed for the released checkpoint.
+
+<p align="center"><img src="assets/readme/rubric-evolution.png" alt="Paper example of statute-search rubric evolution." width="100%"></p>
+
+</details>
+
+## Quick Start
+
+Run commands from the repository root. vLLM serving requires a compatible GPU environment; retrieval defaults to CPU.
+
+### 1. Install
 
 ```bash
-# Requires GitHub CLI. For a private repository, run gh auth login first.
-bash checkpoints/download.sh
-```
-
-The script verifies archive checksums, extracts the model, then verifies every original model file. Allow approximately 34 GB of free disk space for both the archive and extracted model. The resulting directory is `checkpoints/downloads/LegalEvolver-Qwen3-8B/`.
-
-The checkpoint is the step-149 **legal-task reward (lambda=0.01) + ordinal penalty reward** run. Historical training records identify it as a fresh GRPO run from the original merged SFT initialization, with resume disabled. The ordinal penalty score was `0.5 ** abs(predicted_class - gold_class)` for valid classes 0–10. This checkpoint's provenance should not be interpreted as evidence of additional sequential training rounds.
-
-Recorded results (percentage; Acc. / Macro-F1):
-
-| Dataset | Law article | Charge | Prison term |
-|---|---:|---:|---:|
-| CAIL2018 | 82.1 / 70.7 | 79.4 / 71.9 | 22.1 / 21.0 |
-| CMDL | 85.7 / 87.6 | 84.4 / 85.1 | 25.6 / 22.8 |
-
-These match the LegalEvolver row in Table 1 (Overall 61.5). Full precision metrics are provided in `checkpoints/`; only machine-specific source paths were replaced by portable paths.
-
-## Installation
-
-Python 3.10 or newer:
-
-```bash
+git clone https://github.com/yxy-919/LegalEvolver.git
+cd LegalEvolver
+python -m venv .venv
+source .venv/bin/activate
 pip install -e .
-# In a GPU serving environment, install a compatible vLLM build separately:
+pip install huggingface_hub
+# Install a vLLM build compatible with your CUDA/PyTorch environment.
 pip install vllm
 ```
 
-Inference uses an OpenAI-compatible vLLM endpoint. Retrieval can run on CPU separately from model serving.
+Python **3.10+** is required. The default server uses **2 GPUs**; adjust tensor parallelism and context length to fit your hardware. Weights occupy about **16.4 GB**; GPU memory also needs to accommodate the KV cache and runtime overhead.
 
-## Retrieval resources
+### 2. Download the checkpoint
 
-The tools are `statute_search`, `case_search`, `guideline_search`, and `judicial_interpretation_search`. Corpus processing, index building, raw cases and retrieval databases are not distributed. Supply compatible prebuilt resources:
-
-```text
-$LEGAL_INDEX_ROOT/
-  statutes.faiss
-  statutes_metadata.jsonl
-  cases.faiss
-  cases_metadata.jsonl
-  judicial_interpretations.faiss
-  judicial_interpretations_metadata.jsonl
-  guidelines_national.faiss
-  guidelines_national_metadata.jsonl
-  guidelines_local/             Optional province-specific indexes
+```bash
+hf download yxy919/LegalEvolver-Qwen3-8B \
+  --local-dir checkpoints/LegalEvolver-Qwen3-8B
 ```
 
-Each index needs metadata in the identical row order used to build it. Metadata fields are consumed directly by the corresponding retriever, including statute article/version identifiers, case facts and judgment metadata, interpretation clause identifiers, and guideline section identifiers/version tags.
+Or use Python:
+
+```python
+from huggingface_hub import snapshot_download
+
+model_path = snapshot_download(
+    repo_id="yxy919/LegalEvolver-Qwen3-8B",
+    local_dir="checkpoints/LegalEvolver-Qwen3-8B",
+)
+print(model_path)
+```
+
+The model contains four original safetensors shards, their index, tokenizer and configuration files. No manual archive concatenation is needed. The [GitHub Release](https://github.com/yxy-919/LegalEvolver/releases/tag/checkpoint-best-v1) remains a backup, downloadable with `bash checkpoints/download.sh`.
+
+### 3. Start the model server
+
+```bash
+TENSOR_PARALLEL_SIZE=2 bash Eval/inference/serve.sh \
+  checkpoints/LegalEvolver-Qwen3-8B
+
+# In another terminal, check the endpoint:
+curl http://127.0.0.1:8000/v1/models
+```
+
+The served model name is **`LegalEvolver`**. The script binds to localhost:8000 with a 40,960-token context. To change these settings:
+
+```bash
+PORT=8001 TENSOR_PARALLEL_SIZE=1 MAX_MODEL_LEN=20480 \
+  bash Eval/inference/serve.sh checkpoints/LegalEvolver-Qwen3-8B
+```
+
+The server generates the next response. **`run_agentic.py` executes retrieval calls and feeds observations back to the model**; a bare chat-completions request does not execute the legal tools automatically.
+
+### 4. Configure retrieval resources
+
+Supply SAILER, compatible FAISS indexes with aligned metadata, and sentencing context:
 
 ```bash
 export SAILER_MODEL_PATH=/path/to/SAILER_zh
 export LEGAL_INDEX_ROOT=/path/to/prebuilt/indexes
 export SENTENCING_CONTEXT_PATH=/path/to/sentencing_general_context.jsonl
-# Optional custom YAML using the same schema:
-export RUBRIC_REACT_CONFIG=/path/to/retrieval-config.yaml
 ```
 
-Relative paths in the configuration are resolved against the repository root. `Retrieval/config.yaml` defaults to CPU retrieval. Guideline retrieval retains the original 2017-first version filtering and optional provincial-index behavior.
+Corpora, indexes and external encoder weights are **not bundled** with the checkpoint. See the [Retrieval Resource Guide](docs/retrieval.md) for the layout and standalone tool interface.
 
-## Serve and infer
+## Prediction
+
+### Predict one case
+
+Create a JSONL input. This is a **fictional format example**, not a benchmark sample:
 
 ```bash
-TENSOR_PARALLEL_SIZE=2 bash Eval/inference/serve.sh \
-  checkpoints/downloads/LegalEvolver-Qwen3-8B
+mkdir -p data
+cat > data/example_single.jsonl <<'JSONL'
+{"caseID":"demo-single-001","fact":"被告人甲趁乙不备，秘密取走乙放在桌上的手机，后被查获。","meta":{"criminals":["甲"]}}
+JSONL
+
+python -m Eval.inference.run_agentic \
+  --test_dataset_path data/example_single.jsonl --dataset_type single \
+  --output_dir outputs/demo-single --model_name LegalEvolver \
+  --base_urls http://127.0.0.1:8000/v1
 ```
 
-In another shell, configure the retrieval paths above, then run:
+### Predict a dataset
 
 ```bash
+# Single defendant
 python -m Eval.inference.run_agentic \
   --test_dataset_path data/cail_test.jsonl --dataset_type single \
   --output_dir outputs/cail --model_name LegalEvolver \
   --base_urls http://127.0.0.1:8000/v1
 
+# Multiple defendants
 python -m Eval.inference.run_agentic \
   --test_dataset_path data/cmdl_test.jsonl --dataset_type multi \
   --output_dir outputs/cmdl --model_name LegalEvolver \
   --base_urls http://127.0.0.1:8000/v1
 ```
 
-Input is JSONL with `caseID` and `fact`. Single-defendant inputs may provide `meta.criminals`; multiple-defendant inputs provide `defendants`. Explicit `--dataset_type multi` supports inference without gold `outcomes`. Gold judgments are not included in the prompt.
+| Input field | Single defendant | Multiple defendants |
+|:---|:---|:---|
+| `caseID` | Unique case identifier | Unique case identifier |
+| `fact` | Case fact description | Case fact description |
+| Defendant names | `meta.criminals`: list of names | `defendants`: list of names |
+| Gold judgments | Not required for prediction | Not required with `--dataset_type multi` |
 
-The output contains `caseID`, `predict` (the generated trace and answer), and `tool_call` records. The original `<tool_call>`, `<tool_call_result>` and `<answer>` protocol and prompts are retained. Existing output is resumed by case ID and sample count.
+Use `--dataset_type multi` explicitly for unlabeled multi-defendant inputs. Ground-truth outcomes are not inserted into the inference prompt.
 
-The historical inference implementation capped retrieval at **3 hits per call**; this remains the default of `--retrieval_top_k 3`. Use `--retrieval_top_k 4` for the paper-facing four-result setting. The standalone `ToolManager` defaults to 4. The inference generation budget is configurable with `--max_tokens`; use 5000 or 5800 when replaying the historical retry passes. Model context defaults to 40,960 tokens. Decoding, retry passes, retrieval resources and charge-normalization assets can affect exact reproduction; the packaged code has not been rerun on the full benchmark as part of this release preparation.
+### Read the output
 
-## Score predictions
+Each row in `outputs/<run>/predictions.jsonl` includes `caseID`, `sample_idx`, `dataset_type`, `predict` (trace and final answer) and `tool_call` records. Final answers use `<answer>...</answer>` with JSON inside. Prison terms are **class IDs 0–10**, not months; [`prompts.py`](Eval/inference/prompts.py) defines the categories.
+
+```python
+import json
+from Eval.inference.run_agentic import extract_between
+
+with open("outputs/demo-single/predictions.jsonl", encoding="utf-8") as f:
+    row = json.loads(next(f))
+answer = extract_between(row["predict"], "<answer>", "</answer>")
+if answer is None:
+    raise ValueError("No final answer found; inspect the saved trace.")
+print(json.dumps(json.loads(answer), ensure_ascii=False, indent=2))
+```
+
+Single-defendant answers contain `relevant_articles`, `accusation` and `sentence_interval`. Multi-defendant answers contain `defendants`, each with `name` and `judgments`, using those three prediction fields per judgment.
+
+### Generation controls
+
+| Argument | Default | Purpose |
+|:---|:---:|:---|
+| `--max_turn` | 10 | Retrieval-call budget |
+| `--retrieval_top_k` | 3 | Hits per call in the historical runner |
+| `--max_tokens` | 8192 | Generated tokens per model request |
+| `--temperature` / `--top_p` | 0.6 / 0.95 | Sampling settings |
+| `--top_k_sampling` / `--min_p` | 20 / 0 | Additional sampling settings |
+| `--concurrent_limit` | 8 | Concurrent model requests |
+| `--concurrent_limit_tool` | 1 | Concurrent retrieval calls |
+| `--samples_per_case` | 1 | Samples per input case |
+
+Existing output is resumed by case ID and sample count. Use a **new output directory** after changing a checkpoint/configuration. Standalone tools default to four results; use `--retrieval_top_k 4` for the paper-facing four-result setting. [Reproduction Notes](docs/reproduction.md) explain the historical settings.
+
+## Evaluation
+
+Use labeled gold JSONL in the **original CAIL2018/CMDL schema** and the runner's prediction JSONL. The prediction-only example above lacks the labels needed for scoring. See [Evaluation Input Formats](docs/evaluation.md) for synthetic schema examples and the gold/prediction field mapping.
 
 ```bash
-# Optional, for the original semantic charge-normalization fallback:
+# Optional: original semantic fallback for charge normalization.
 export BGE_MODEL_PATH=/path/to/BAAI_bge-m3
 
+# Single defendant
 python -m Eval.new_eval_single_defendant \
   --gold_path data/cail_test.jsonl \
   --pred_path outputs/cail/predictions.jsonl \
   --output_path outputs/cail/metrics.json --include_summary
 
+# Multiple defendants
 python -m Eval.eval_multi_defendant \
   --gold_path data/cmdl_test.jsonl \
   --pred_path outputs/cmdl/predictions.jsonl \
   --output_path outputs/cmdl/metrics.json --include_summary
 ```
 
-These are the original experiment scoring implementations, with imports and environment-specific paths adapted. Single-defendant scoring retains the original first-label article/charge convention. Multiple-defendant scoring aligns defendants by name and retains its original set metrics and case/defendant weighting. Charge vocabularies, alias mapping and precomputed embeddings are included under `Eval/data/`; the BGE encoder itself must be supplied separately. Without that encoder, semantic fallback is disabled and some normalized charge predictions may differ from the recorded benchmark.
+Both scripts report law-article, charge and prison-term metrics. Single-defendant scoring preserves the original first-label article/charge convention. Multi-defendant scoring aligns predictions **by defendant name**, retaining the original set metrics and case/defendant weighting.
+
+Charge vocabularies, aliases and precomputed embeddings are in [`Eval/data/`](Eval/data/). Supply the BGE encoder separately for the original semantic normalization fallback; without it, some charge mappings can differ.
+
+## Retrieval Tools
+
+| Tool | Evidence | Typical question |
+|:---|:---|:---|
+| `statute_search` | Criminal-law articles and statutory text | Which statutory elements and provisions apply? |
+| `case_search` | Similar facts, articles, charges and sentencing information | How were comparable circumstances judged? |
+| `judicial_interpretation_search` | Clause-level judicial interpretations | How are legal elements, thresholds or boundaries interpreted? |
+| `guideline_search` | National guidelines and optional provincial indexes | Which sentencing ranges and adjustment factors are relevant? |
+
+The release uses a shared **SAILER encoder + FAISS dense search**, returning **evidence cards** with source identifiers, text, scores and metadata. Guideline retrieval retains version filtering and optional provincial-index handling. The paper environment describes 491 statutory articles, 7,214 interpretation clauses and 64 national guideline sections; those counts refer to external corpora, not files bundled here.
+
+```python
+from Retrieval.tool_manager import ToolManager
+
+tools = ToolManager(topk_default=4, topk_max=4)
+result = tools.call_tool(
+    "statute_search",
+    {"query": "借用手机后逃离 盗窃与诈骗 财物处分意思", "topk": 4},
+)
+for card in result.get("results", []):
+    print(card["title"], card["text"])
+```
+
+The tools also work independently of the model. See [the retrieval guide](docs/retrieval.md) for resource configuration and the boundary between the paper environment and this inference release.
+
+## Repository Map
+
+```text
+Retrieval/                 Legal tools, SAILER encoder and FAISS helpers
+Eval/
+  inference/               Multi-turn runner, prompts and vLLM serving
+  new_eval_single_defendant.py
+  eval_multi_defendant.py
+  common.py                Parsing, normalization and metrics
+  data/                    Charge vocabularies, aliases and embeddings
+checkpoints/               Download helper, checksums and recorded metrics
+assets/                    Manuscript figures
+docs/                      Retrieval guide and reproduction notes
+```
+
+Inference lives in `Eval/inference/`, scoring in `Eval/`, using one directory spelling for case-insensitive filesystem compatibility.
+
+## Citation
+
+If you use this work, please cite the manuscript:
+
+```bibtex
+@misc{yang2026legalevolver,
+  title  = {LegalEvolver: Agentic Legal Judgment Prediction via Rubric-Guided Self-Evolution},
+  author = {Xinyu Yang and Jiejun Tan and Chenlong Deng and Chenghao Zhang and Tongyu Wen and Zhicheng Dou},
+  year   = {2026},
+  note   = {Research manuscript},
+  url    = {https://github.com/yxy-919/LegalEvolver}
+}
+```
+
+**Contact:** [yxygsai@ruc.edu.cn](mailto:yxygsai@ruc.edu.cn) · [dou@ruc.edu.cn](mailto:dou@ruc.edu.cn)

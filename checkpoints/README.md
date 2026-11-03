@@ -1,6 +1,12 @@
 # Released checkpoint
 
-Weights: [checkpoint-best-v1](https://github.com/yxy-919/LegalEvolver/releases/tag/checkpoint-best-v1).
+Primary weights: [Hugging Face — LegalEvolver-Qwen3-8B](https://huggingface.co/yxy919/LegalEvolver-Qwen3-8B).
+
+```bash
+hf download yxy919/LegalEvolver-Qwen3-8B --local-dir checkpoints/LegalEvolver-Qwen3-8B
+```
+
+Backup: [GitHub Release checkpoint-best-v1](https://github.com/yxy-919/LegalEvolver/releases/tag/checkpoint-best-v1).
 
 The Release distributes the original merged step-149 Qwen3-8B model, including all four safetensors shards, tokenizer files, model configuration and generation configuration. Optimizer states and raw FSDP training shards are not needed for inference and are not included.
 

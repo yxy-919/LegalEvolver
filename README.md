@@ -130,15 +130,18 @@ The server generates the next response. **`run_agentic.py` executes retrieval ca
 
 ### 4. Configure retrieval resources
 
-Supply SAILER, compatible FAISS indexes with aligned metadata, and sentencing context:
+Download the complete FAISS indexes, aligned metadata, and sentencing context from the [retrieval data release](https://github.com/yxy-919/LegalEvolver/releases/tag/retrieval-data-v1). The download script verifies the archive before extraction.
 
 ```bash
-export SAILER_MODEL_PATH=/path/to/SAILER_zh
-export LEGAL_INDEX_ROOT=/path/to/prebuilt/indexes
-export SENTENCING_CONTEXT_PATH=/path/to/sentencing_general_context.jsonl
+pip install huggingface_hub
+hf download CSHaitao/SAILER_zh --local-dir checkpoints/SAILER_zh
+bash Retrieval/download_full_data.sh
+export SAILER_MODEL_PATH="$PWD/checkpoints/SAILER_zh"
+export LEGAL_INDEX_ROOT="$PWD/data/retrieval-full/indexes"
+export SENTENCING_CONTEXT_PATH="$PWD/data/retrieval-full/sentencing_general_context.jsonl"
 ```
 
-Small database subsets and aligned indexes are included for trial use; full corpora/indexes and external encoder weights are supplied separately. See the [Retrieval Resource Guide](docs/retrieval.md) for the layout and standalone tool interface.
+See the [Retrieval Resource Guide](docs/retrieval.md) for the file layout and standalone tool interface. The complete data includes national and available provincial guideline indexes; the bundled subsets below provide a smaller alternative for testing.
 
 ### Try the bundled database subsets
 
@@ -157,7 +160,6 @@ These subsets are for trying the tools and exercising the inference/evaluation w
 # Download the public SAILER encoder; the subset indexes are already included.
 hf download CSHaitao/SAILER_zh --local-dir checkpoints/SAILER_zh
 export SAILER_MODEL_PATH="$PWD/checkpoints/SAILER_zh"
-export RUBRIC_REACT_CONFIG="$PWD/Retrieval/demo_config.yaml"
 
 # Exercise all four retrieval tools on CPU.
 python -m Retrieval.demo
@@ -291,7 +293,7 @@ Charge vocabularies, aliases and precomputed embeddings are in [`Eval/data/`](Ev
 | `judicial_interpretation_search` | Clause-level judicial interpretations | How are legal elements, thresholds or boundaries interpreted? |
 | `guideline_search` | National guidelines and optional provincial indexes | Which sentencing ranges and adjustment factors are relevant? |
 
-The release uses a shared **SAILER encoder + FAISS dense search**, returning **evidence cards** with source identifiers, text, scores and metadata. Guideline retrieval retains version filtering and optional provincial-index handling. The paper environment describes 491 statutory articles, 7,214 interpretation clauses and 64 national guideline sections; those counts refer to external corpora, not files bundled here.
+The release uses a shared **SAILER encoder + FAISS dense search**, returning **evidence cards** with source identifiers, text, scores and metadata. Guideline retrieval retains version filtering and optional provincial-index handling. The paper environment describes 491 statutory articles, 7,214 interpretation clauses and 64 national guideline sections; the complete retrieval indexes and metadata are available in the retrieval data release.
 
 ```python
 from Retrieval.tool_manager import ToolManager

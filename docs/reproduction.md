@@ -23,7 +23,7 @@ Release preparation did not rerun the full benchmark. Exact reproduction depends
 
 ## External retrieval and scoring resources
 
-This release supplies original retrieval modules with portable imports/configuration. Small database subsets and aligned indexes are included for functional trials. Full corpora/indexes, preprocessing/index building, SAILER weights and BGE weights are supplied separately.
+This release supplies original retrieval modules with portable imports/configuration. Small database subsets and aligned indexes are included for functional trials; full retrieval indexes and metadata are available through the retrieval data release. Corpus preprocessing/index building, SAILER weights and BGE weights are supplied separately.
 
 The manuscript describes source-specific lexical reranking, query limits, candidate expansion and snippet truncation. Packaged modules implement dense retrieval and source-specific formatting/version handling; the complete paper environment preprocessing/reranking pipeline is not provided. The packaged encoder maximum length defaults to 512 tokens in `Retrieval/config.yaml`; the manuscript environment reports 256. External indexes alone do not reconstruct every paper-side setting.
 

@@ -4,12 +4,17 @@ The four tools share a SAILER encoder and cached FAISS index bundles. They can b
 
 ## External files
 
-Set these variables before inference/tool use:
+Download and verify the complete index archive, then set these variables before inference/tool use:
 
 ```bash
-export SAILER_MODEL_PATH=/path/to/SAILER_zh
-export LEGAL_INDEX_ROOT=/path/to/prebuilt/indexes
-export SENTENCING_CONTEXT_PATH=/path/to/sentencing_general_context.jsonl
+hf download CSHaitao/SAILER_zh --local-dir checkpoints/SAILER_zh
+bash Retrieval/download_full_data.sh
+```
+
+```bash
+export SAILER_MODEL_PATH="$PWD/checkpoints/SAILER_zh"
+export LEGAL_INDEX_ROOT="$PWD/data/retrieval-full/indexes"
+export SENTENCING_CONTEXT_PATH="$PWD/data/retrieval-full/sentencing_general_context.jsonl"
 ```
 
 Expected layout:
@@ -27,7 +32,7 @@ $LEGAL_INDEX_ROOT/
   guidelines_local/                  Optional province-specific indexes
 ```
 
-Indexes must match the encoder used to build them. Metadata rows must remain in exactly the same order as index vectors. Small subsets with aligned indexes are included under `Retrieval/demo_data/`; full databases and encoder weights are supplied separately. See the README demo commands.
+Indexes must match the encoder used to build them. Metadata rows must remain in exactly the same order as index vectors. The complete index files and metadata are distributed through the retrieval data release. Small subsets remain available under `Retrieval/demo_data/`; SAILER weights are downloaded separately.
 
 Source metadata is consumed directly by the retrievers: statute article/version identifiers and text; case facts/judgment metadata; interpretation clause identifiers/related articles; guideline section identifiers, source scope and version tags. Inspect the corresponding module for complete field accesses. Arbitrary indexes with a different schema are not interchangeable.
 

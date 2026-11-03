@@ -1,0 +1,11 @@
+paths:
+  sailer_model: ${SAILER_MODEL_PATH}
+  index_dir: Retrieval/demo_data
+  sentencing_general_context: Retrieval/demo_data/sentencing_general_context.jsonl
+retrieval:
+  batch_size: 8
+  max_length: 512
+  guideline_version_group: '2017'
+  context_version: '2017'
+runtime:
+  retrieval_device: cpu

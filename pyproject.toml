@@ -26,4 +26,5 @@ serve = ["vllm"]
 include = ["Retrieval*", "Eval*"]
 
 [tool.setuptools.package-data]
-Retrieval = ["config.yaml"]
+Retrieval = ["config.yaml", "demo_config.yaml", "demo_data/*"]
+Eval = ["data/*", "demo_data/*"]

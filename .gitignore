@@ -16,3 +16,5 @@ logs/
 *.log
 *.pid
 .DS_Store
+
+checkpoints/SAILER_zh/

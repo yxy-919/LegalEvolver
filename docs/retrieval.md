@@ -27,7 +27,7 @@ $LEGAL_INDEX_ROOT/
   guidelines_local/                  Optional province-specific indexes
 ```
 
-Indexes must match the encoder used to build them. Metadata rows must remain in exactly the same order as index vectors. These files, raw cases and encoder weights are not included.
+Indexes must match the encoder used to build them. Metadata rows must remain in exactly the same order as index vectors. Small subsets with aligned indexes are included under `Retrieval/demo_data/`; full databases and encoder weights are supplied separately. See the README demo commands.
 
 Source metadata is consumed directly by the retrievers: statute article/version identifiers and text; case facts/judgment metadata; interpretation clause identifiers/related articles; guideline section identifiers, source scope and version tags. Inspect the corresponding module for complete field accesses. Arbitrary indexes with a different schema are not interchangeable.
 

@@ -24,17 +24,7 @@ Renmin University of China
 
 ## Overview
 
-Legal judgment prediction requires more than recalling a charge name: the model must identify the legal issue, retrieve relevant evidence, and predict **law articles, charges and prison-term categories**. A vague or prematurely committed query can send the reasoning process in the wrong direction.
-
-**LegalEvolver** studies how to make intermediate legal searches more informative. The paper combines three components:
-
-1. **Diverse trajectory generation.** High-temperature exploration and conservative, fact-enriched and targeted-repair query rewriting supply candidate reasoning-and-search trajectories. Successful trajectories initialize the policy through supervised fine-tuning.
-2. **Legal query rubrics.** Within-case contrasts between successful and failed trajectories yield criteria organized by **four retrieval tools × three reasoning focuses**: legal qualification, sentencing and full repair.
-3. **Rubric-policy co-evolution.** Rubric feedback guides policy optimization, while new policy trajectories inform subsequent rubric refinement.
-
-At inference time, the agent alternates between reasoning, retrieval and observation before producing a structured judgment. Both **single-defendant** and **multiple-defendant** cases are supported.
-
-> **Release scope:** this repository contains retrieval, inference and evaluation code, plus links to the weights. Training and rubric-construction pipelines are outside this release. Inference settings and external resource requirements are documented in [Reproduction Notes](docs/reproduction.md).
+To address these challenges, we propose LegalEvolver, a framework for training legal search agents. It learns query rubrics from the agent's own trajectories and keeps refreshing them as the agent improves. Training consists of three consecutive stages. **(1) Diverse Trajectory Generation and Policy Initialization.** We first sample diverse reasoning and retrieval trajectories at a high temperature, then apply expert-inspired heuristics to rewrite their retrieval queries, producing additional candidate trajectories. Rejection sampling selects successful trajectories for supervised fine-tuning, equipping the agent with effective initial reasoning and retrieval behaviors. **(2) Initial Rubric Construction.** To construct query-level supervision, we contrast successful trajectories with failed trajectories for the same problem, examining how differences in query construction contribute to their divergent outcomes. We distill these comparisons into an initial set of legal query rubrics that provide explicit criteria for evaluating intermediate queries. **(3) Rubric--Policy Co-Evolution.** Building on this initialization, we jointly improve the query rubrics and the agent policy through iterative self-evolution. We combine rubric-based rewards with outcome rewards for reinforcement learning, providing feedback on both intermediate query quality and final prediction correctness. As the updated policy generates new successful trajectories, we use them to re-induce the rubrics, incorporating retrieval strategies discovered during training. The revised rubrics then guide the next round of policy optimization. Alternating these steps lets supervision evolve with the agent's capabilities, enabling improvement beyond the initial demonstrations and fixed rubric criteria.
 
 ## Results
 
@@ -57,7 +47,6 @@ Selected Qwen3-8B comparisons from manuscript **Table 1**. Each cell is **Accura
 
 **Overall: 61.5**, compared with 60.4 for SmartSearch and 59.9 for Standard GRPO. Overall is the unweighted mean of the 12 task/dataset metrics. The manuscript evaluates balanced test subsets of **1,000 CAIL2018 cases** and **2,000 CMDL cases**.
 
-Full precision checkpoint results: [`cail_metrics.json`](checkpoints/cail_metrics.json) and [`cmdl_metrics.json`](checkpoints/cmdl_metrics.json). These are historical records; release preparation did not rerun the full benchmark.
 
 <details>
 <summary><b>Query quality and rubric evolution in the paper</b></summary>
@@ -141,7 +130,48 @@ export LEGAL_INDEX_ROOT=/path/to/prebuilt/indexes
 export SENTENCING_CONTEXT_PATH=/path/to/sentencing_general_context.jsonl
 ```
 
-Corpora, indexes and external encoder weights are **not bundled** with the checkpoint. See the [Retrieval Resource Guide](docs/retrieval.md) for the layout and standalone tool interface.
+Small database subsets and aligned indexes are included for trial use; full corpora/indexes and external encoder weights are supplied separately. See the [Retrieval Resource Guide](docs/retrieval.md) for the layout and standalone tool interface.
+
+### Try the bundled database subsets
+
+The repository includes small subsets of the existing processed databases and their aligned FAISS vectors:
+
+| Database | Records |
+|:---|---:|
+| Statutes | 48 |
+| Precedents | 64 |
+| Judicial interpretations | 64 |
+| National sentencing guidelines | 32 |
+
+These subsets are for trying the tools and exercising the inference/evaluation workflow, rather than reproducing the full benchmark. They are selected across categories/documents where available; `Retrieval/demo_data/manifest.json` records the selection. The sentencing context is included. Local provincial indexes are optional and are not included.
+
+```bash
+# Download the public SAILER encoder; the subset indexes are already included.
+hf download CSHaitao/SAILER_zh --local-dir checkpoints/SAILER_zh
+export SAILER_MODEL_PATH="$PWD/checkpoints/SAILER_zh"
+export RUBRIC_REACT_CONFIG="$PWD/Retrieval/demo_config.yaml"
+
+# Exercise all four retrieval tools on CPU.
+python -m Retrieval.demo
+
+# With the LegalEvolver model server running as described above:
+python -m Eval.inference.run_agentic \
+  --test_dataset_path Eval/demo_data/single.jsonl --dataset_type single \
+  --output_dir outputs/demo-single --retrieval_config Retrieval/demo_config.yaml
+python -m Eval.inference.run_agentic \
+  --test_dataset_path Eval/demo_data/multi.jsonl --dataset_type multi \
+  --output_dir outputs/demo-multi --retrieval_config Retrieval/demo_config.yaml
+
+python -m Eval.new_eval_single_defendant \
+  --gold_path Eval/demo_data/single.jsonl --pred_path outputs/demo-single/predictions.jsonl \
+  --output_path outputs/demo-single/metrics.json --include_summary
+python -m Eval.eval_multi_defendant \
+  --gold_path Eval/demo_data/multi.jsonl --pred_path outputs/demo-multi/predictions.jsonl \
+  --output_path outputs/demo-multi/metrics.json --include_summary
+```
+
+The single-defendant examples come from the precedent subset. The multi-defendant file explicitly concatenates two independent examples to demonstrate the input/output format; it is not a real joint case or a benchmark. Demo scores only check the workflow. The original BGE charge-normalization encoder is optional as described under Evaluation.
+
 
 ## Prediction
 

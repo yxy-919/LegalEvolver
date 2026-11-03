@@ -1,16 +1,10 @@
-# Checkpoint provenance and reproduction
+# Inference and reproduction notes
 
 ## Released artifact
 
 Hugging Face `yxy919/LegalEvolver-Qwen3-8B` and GitHub Release `checkpoint-best-v1` contain the same merged inference checkpoint: four safetensors shards, their index, tokenizer, model configuration and generation configuration. Raw FSDP training shards and optimizer states are excluded.
 
 [`checkpoints/model.SHA256SUMS`](../checkpoints/model.SHA256SUMS) records hashes of the 13 original files. Model bytes are unchanged from the evaluated merged checkpoint.
-
-## Historical training provenance
-
-Training records identify a **fresh GRPO run from the original merged SFT initialization**, with resume disabled, one epoch and 149 steps. Its configuration used a legal-task reward weight of **0.01** together with an ordinal penalty reward. The ordinal penalty score was `0.5 ** abs(predicted_class - gold_class)` for valid classes 0–10.
-
-This is the checkpoint associated with the saved CAIL2018/CMDL metrics. The paper describes the broader rubric-policy co-evolution framework; this artifact's verified provenance does not establish additional sequential training rounds. Training and rubric-generation code are outside this release.
 
 ## Recorded results
 

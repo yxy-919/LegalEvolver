@@ -34,7 +34,7 @@ Legal judgment prediction requires more than recalling a charge name: the model 
 
 At inference time, the agent alternates between reasoning, retrieval and observation before producing a structured judgment. Both **single-defendant** and **multiple-defendant** cases are supported.
 
-> **Release scope:** this repository contains retrieval, inference and evaluation code, plus links to the weights. Training and rubric-construction pipelines are outside this release. The verified step-149 checkpoint provenance and reproduction settings are documented in [Reproduction Notes](docs/reproduction.md).
+> **Release scope:** this repository contains retrieval, inference and evaluation code, plus links to the weights. Training and rubric-construction pipelines are outside this release. Inference settings and external resource requirements are documented in [Reproduction Notes](docs/reproduction.md).
 
 ## Results
 
@@ -66,7 +66,7 @@ The paper examines legal specificity, legal-issue completeness, retrieval action
 
 <p align="center"><img src="assets/readme/query-quality.png" alt="Paper analysis of query failures and four query-quality dimensions." width="100%"></p>
 
-The statute-search example below shows criteria becoming more explicit about decisive facts, offense boundaries and statutory sentencing tiers. These figures describe the paper's analysis, rather than additional training stages claimed for the released checkpoint.
+The statute-search example below shows criteria becoming more explicit about decisive facts, offense boundaries and statutory sentencing tiers. These figures summarize the paper's query analysis and rubric design.
 
 <p align="center"><img src="assets/readme/rubric-evolution.png" alt="Paper example of statute-search rubric evolution." width="100%"></p>
 

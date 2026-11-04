@@ -141,47 +141,7 @@ export LEGAL_INDEX_ROOT="$PWD/data/retrieval-full/indexes"
 export SENTENCING_CONTEXT_PATH="$PWD/data/retrieval-full/sentencing_general_context.jsonl"
 ```
 
-See the [Retrieval Resource Guide](docs/retrieval.md) for the file layout and standalone tool interface. The complete data includes national and available provincial guideline indexes; the bundled subsets below provide a smaller alternative for testing.
-
-### Try the bundled database subsets
-
-The repository includes small subsets of the existing processed databases and their aligned FAISS vectors:
-
-| Database | Records |
-|:---|---:|
-| Statutes | 48 |
-| Precedents | 64 |
-| Judicial interpretations | 64 |
-| National sentencing guidelines | 32 |
-
-These subsets are for trying the tools and exercising the inference/evaluation workflow, rather than reproducing the full benchmark. They are selected across categories/documents where available; `Retrieval/demo_data/manifest.json` records the selection. The sentencing context is included. Local provincial indexes are optional and are not included.
-
-```bash
-# Download the public SAILER encoder; the subset indexes are already included.
-hf download CSHaitao/SAILER_zh --local-dir checkpoints/SAILER_zh
-export SAILER_MODEL_PATH="$PWD/checkpoints/SAILER_zh"
-
-# Exercise all four retrieval tools on CPU.
-python -m Retrieval.demo
-
-# With the LegalEvolver model server running as described above:
-python -m Eval.inference.run_agentic \
-  --test_dataset_path Eval/demo_data/single.jsonl --dataset_type single \
-  --output_dir outputs/demo-single --retrieval_config Retrieval/demo_config.yaml
-python -m Eval.inference.run_agentic \
-  --test_dataset_path Eval/demo_data/multi.jsonl --dataset_type multi \
-  --output_dir outputs/demo-multi --retrieval_config Retrieval/demo_config.yaml
-
-python -m Eval.new_eval_single_defendant \
-  --gold_path Eval/demo_data/single.jsonl --pred_path outputs/demo-single/predictions.jsonl \
-  --output_path outputs/demo-single/metrics.json --include_summary
-python -m Eval.eval_multi_defendant \
-  --gold_path Eval/demo_data/multi.jsonl --pred_path outputs/demo-multi/predictions.jsonl \
-  --output_path outputs/demo-multi/metrics.json --include_summary
-```
-
-The single-defendant examples come from the precedent subset. The multi-defendant file explicitly concatenates two independent examples to demonstrate the input/output format; it is not a real joint case or a benchmark. Demo scores only check the workflow. The original BGE charge-normalization encoder is optional as described under Evaluation.
-
+See the [Retrieval Resource Guide](docs/retrieval.md) for the file layout and standalone tool interface. The complete data includes national and available provincial guideline indexes.
 
 ## Prediction
 

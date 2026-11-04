@@ -147,7 +147,7 @@ See the [Retrieval Resource Guide](docs/retrieval.md) for the file layout and st
 
 ### Predict one case
 
-Create a JSONL input. This is a **fictional format example**, not a benchmark sample:
+Create a JSONL input. Here is a usage example:
 
 ```bash
 mkdir -p data
@@ -217,7 +217,6 @@ Single-defendant answers contain `relevant_articles`, `accusation` and `sentence
 | `--concurrent_limit_tool` | 1 | Concurrent retrieval calls |
 | `--samples_per_case` | 1 | Samples per input case |
 
-Existing output is resumed by case ID and sample count. Use a **new output directory** after changing a checkpoint/configuration. Standalone tools default to four results; use `--retrieval_top_k 4` for the paper-facing four-result setting. [Reproduction Notes](docs/reproduction.md) explain the historical settings.
 
 ## Evaluation
 

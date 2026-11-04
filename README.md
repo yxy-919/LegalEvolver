@@ -56,8 +56,7 @@ Selected Qwen3-8B comparisons from manuscript **Table 1**. Each cell is **Accura
 **Overall: 61.5**, compared with 60.4 for SmartSearch and 59.9 for Standard GRPO. Overall is the unweighted mean of the 12 task/dataset metrics. The manuscript evaluates balanced test subsets of **1,000 CAIL2018 cases** and **2,000 CMDL cases**.
 
 
-<details>
-<summary><b>Query quality and rubric evolution in the paper</b></summary>
+### Query quality and rubric evolution in the paper
 
 The paper examines legal specificity, legal-issue completeness, retrieval actionability and alternative awareness. It reports an average query-quality score of **3.97** for LegalEvolver, compared with **3.22** for SmartSearch and **2.16** for Agentic RAG.
 
@@ -66,8 +65,6 @@ The paper examines legal specificity, legal-issue completeness, retrieval action
 The statute-search example below shows criteria becoming more explicit about decisive facts, offense boundaries and statutory sentencing tiers. These figures summarize the paper's query analysis and rubric design.
 
 <p align="center"><img src="assets/readme/rubric-evolution.png" alt="Paper example of statute-search rubric evolution." width="100%"></p>
-
-</details>
 
 ## Quick Start
 

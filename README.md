@@ -280,7 +280,7 @@ Eval/
   data/                    Charge vocabularies, aliases and embeddings
 checkpoints/               Download helper, checksums and recorded metrics
 assets/                    Manuscript figures
-docs/                      Retrieval guide and reproduction notes
+docs/                      Retrieval and evaluation guides
 ```
 
 Inference lives in `Eval/inference/`, scoring in `Eval/`, using one directory spelling for case-insensitive filesystem compatibility.

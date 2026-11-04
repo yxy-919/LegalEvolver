@@ -91,4 +91,4 @@ The runner formats cards as observations and preserves call records in predictio
 
 ## Paper environment and this release
 
-The paper describes SAILER-zh, FAISS and source-specific reranking over external corpora. This release supplies dense-search modules and source formatting/version handling, rather than the entire corpus preprocessing/reranking pipeline. See [Reproduction Notes](reproduction.md) for configuration differences, including the historical three-hit runner cap.
+The paper describes SAILER-zh, FAISS and source-specific reranking over external corpora. This release supplies dense-search modules and source formatting/version handling, rather than the entire corpus preprocessing/reranking pipeline.
